@@ -1,0 +1,4 @@
+En la carpeta backend
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.venv\Scripts\Activate.ps1
+uvicorn main:app --reload
