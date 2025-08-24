@@ -1,0 +1,17 @@
+Problema,Solucion
+Falanet no funciona en Edge,"Ir a Panel de control → Iconos pequeños → Opciones de internet → Opciones avanzadas → habilitar extensión de terceros + marcar opción TLS → Aplicar y aceptar"
+Error en Citrix en PC,"Salir sesión de Citrix en google → matar procesos Citrix desde administrador de tareas, volver a abir citrix"
+Drivers de las impresoras,"Servidor: 10.120.111.105 → Carpeta compartida con drivers"
+Relojes biométricos Geovictoria,"Usuario enrolador 15/clave 2025, admin 17/clave 2385. Configuración en .12 y .13"
+Datáfono Redeban pantalla azul,"Cambiarlo → deshabilitar y volver a habilitar"
+Habilitar Datafono Redeban,"F2 → ver → clave 1526 → opcion 6 → deshabilitar → opcion 6 de nuevo → habilitar → verde → rojo → rojo → verde → verde"
+Acceso a servidor,"Comando: mstsc /admin"
+Usuario de pos Regcol,"Clave: f414.16$Rf"
+Usuario de pos pos0#tienda, "Posfal.0#tienda"
+Clave admin PDT,"$1mb0l"
+clave de WiFi Falabella VIP,"falab311a_vip"
+clave de WiFi Falacorp,"Ipc@rd$uv@173"
+clave de WiFi Exhibiciones,"3xh1b1c10n3s"
+clave de WiFi Apple,"4ppl3_F4l4b3ll4"
+Error en teams no aparecen los equipos en Teams ni los archivos,"Ir a configuración del PC → Aplicaciones → Buscar Teams → Configuración avanzada → Reparar"
+    

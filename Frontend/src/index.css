@@ -1,0 +1,33 @@
+@import url("https://fonts.googleapis.com/css2?family=Inconsolata:wght@200..900&display=swap");
+
+html {
+  scroll-behavior: smooth;
+  scrollbar-color: #16171a transparent;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: "Inconsolata";
+  background: #20222c ;
+  background-image: url(https://portafoliojdm.netlify.app/media/Otros/bk.png);
+  color: white;
+  transition: all 0.3s ease;
+}
+.glow {
+     position: absolute;
+    left: 50%;
+    width: 30%;
+    height: 50%;
+    border-radius: 30%;
+    display: block;
+    background: radial-gradient(#064625aa 20%, #7ec97655 100%);
+    transform: translate(-50%,-50%);
+    will-change: transform;
+    filter: blur(100px);
+    z-index: -1;
+    top: 50%;
+}
