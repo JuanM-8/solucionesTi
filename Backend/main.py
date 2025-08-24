@@ -3,7 +3,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import pandas as pd
-from sentence_transformers import SentenceTransformer, util
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 # ---- App y CORS ----
 app = FastAPI()
@@ -18,30 +19,30 @@ app.add_middleware(
 # ---- Modelo y datos ----
 # Carga el CSV (debe tener columnas: Problema, Solucion)
 data = pd.read_csv("problemas.csv")
-problemas = data["Problema"].tolist()
-soluciones = data["Solucion"].tolist()
+problemas = data["Problema"].fillna("").tolist()
+soluciones = data["Solucion"].fillna("").tolist()
 
-# Modelo de embeddings
-model = SentenceTransformer("all-MiniLM-L6-v2")
-problemas_embeddings = model.encode(problemas, convert_to_tensor=True)
+# Vectorizador TF-IDF (más liviano que embeddings)
+vectorizer = TfidfVectorizer()
+problemas_tfidf = vectorizer.fit_transform(problemas)
 
 # ---- Esquema de entrada ----
 class Query(BaseModel):
     query: str
-    top_n: int = 4 # cuántas soluciones devolver 
+    top_n: int = 4
     umbral: float = 0.0  # umbral de similitud (0 a 1). Si no alcanza, se filtra.
 
 # ---- Endpoint ----
 @app.post("/buscar")
 def buscar(q: Query):
-    # Embedding de la consulta
-    query_embedding = model.encode(q.query, convert_to_tensor=True)
+    # Transformamos la consulta en vector TF-IDF
+    query_vec = vectorizer.transform([q.query])
 
-    # Similitudes (cosine)
-    similitudes = util.pytorch_cos_sim(query_embedding, problemas_embeddings)[0]
+    # Similitud coseno
+    similitudes = cosine_similarity(query_vec, problemas_tfidf)[0]
 
     # Top N índices
-    indices = similitudes.argsort(descending=True)[: q.top_n]
+    indices = similitudes.argsort()[::-1][: q.top_n]
 
     resultados = []
     for idx in indices.tolist():
@@ -63,6 +64,6 @@ def todas_las_soluciones():
         resultados.append({
             "problema": problema,
             "solucion": solucion,
-            "score": 1.0  # opcional, como marcador
+            "score": 1.0
         })
     return {"resultados": resultados}
