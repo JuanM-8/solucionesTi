@@ -1,6 +1,7 @@
 # backend/main.py
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -10,38 +11,61 @@ from sklearn.metrics.pairwise import cosine_similarity
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # en producción limita esto a tu dominio
+    allow_origins=["https://solucionesti.netlify.app/"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# ---- Autenticación (simple) ----
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
+# Usuarios simulados en memoria (puedes poner en BD luego)
+fake_users_db = {
+    "juan": {
+        "username": "juan",
+        "password": "1234",  # ⚠️ en producción nunca guardar plano
+        "token": "secrettoken123"  # token estático para simplificar
+    }
+}
+
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    # Buscar si el token existe en nuestra "BD"
+    for user in fake_users_db.values():
+        if user["token"] == token:
+            return user
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Token inválido",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+@app.post("/login")
+def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    user_dict = fake_users_db.get(form_data.username)
+    if not user_dict or user_dict["password"] != form_data.password:
+        raise HTTPException(status_code=400, detail="Usuario o contraseña incorrectos")
+    # Retornamos un token fijo (simple)
+    return {"access_token": user_dict["token"], "token_type": "bearer"}
+
 # ---- Modelo y datos ----
-# Carga el CSV (debe tener columnas: Problema, Solucion)
 data = pd.read_csv("problemas.csv")
 problemas = data["Problema"].fillna("").tolist()
 soluciones = data["Solucion"].fillna("").tolist()
 
-# Vectorizador TF-IDF (más liviano que embeddings)
 vectorizer = TfidfVectorizer()
 problemas_tfidf = vectorizer.fit_transform(problemas)
 
-# ---- Esquema de entrada ----
 class Query(BaseModel):
     query: str
     top_n: int = 4
-    umbral: float = 0.0  # umbral de similitud (0 a 1). Si no alcanza, se filtra.
+    umbral: float = 0.0
 
-# ---- Endpoint ----
+# ---- Endpoint protegido ----
 @app.post("/buscar")
-def buscar(q: Query):
-    # Transformamos la consulta en vector TF-IDF
+def buscar(q: Query, user: dict = Depends(get_current_user)):
     query_vec = vectorizer.transform([q.query])
-
-    # Similitud coseno
     similitudes = cosine_similarity(query_vec, problemas_tfidf)[0]
-
-    # Top N índices
     indices = similitudes.argsort()[::-1][: q.top_n]
 
     resultados = []
@@ -53,12 +77,10 @@ def buscar(q: Query):
                 "solucion": soluciones[idx],
                 "score": score
             })
-
     return {"resultados": resultados}
 
-
 @app.get("/todas")
-def todas_las_soluciones():
+def todas_las_soluciones(user: dict = Depends(get_current_user)):
     resultados = []
     for problema, solucion in zip(problemas, soluciones):
         resultados.append({
