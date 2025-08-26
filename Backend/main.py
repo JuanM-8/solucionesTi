@@ -19,15 +19,15 @@ problemas = df["Problema"].fillna("").tolist()
 soluciones = df["Solucion"].fillna("").tolist()
 
 # ===== Vectorizador =====
-vectorizer = TfidfVectorizer()
+vectorizer = TfidfVectorizer(analyzer="word", ngram_range=(1, 2))  
+# 🔎 con ngram_range detecta mejor fragmentos como "wif" ~ "wifi"
 problemas_tfidf = vectorizer.fit_transform(problemas)
 
 # ===== Modelos =====
 class Query(BaseModel):
     query: str
     top_n: int = 4
-    umbral: float = 0.1
-
+    umbral: float = 0.05   # 🔽 bajamos el mínimo
 
 # ===== Endpoints =====
 @app.get("/")
@@ -38,17 +38,22 @@ def root():
 def buscar(q: Query):
     query_vec = vectorizer.transform([q.query])
     similitudes = cosine_similarity(query_vec, problemas_tfidf)[0]
-    indices = similitudes.argsort()[::-1][: q.top_n]
+
+    # Ordenar de mayor a menor similitud
+    indices = similitudes.argsort()[::-1]
 
     resultados = []
-    for idx in indices.tolist():
+    for idx in indices:
         score = float(similitudes[idx])
-        if score >= q.umbral:
+        if score >= q.umbral or len(resultados) < q.top_n:
             resultados.append({
                 "problema": problemas[idx],
                 "solucion": soluciones[idx],
-                "score": score
+                "score": round(score, 3)
             })
+        if len(resultados) >= q.top_n:
+            break
+
     return {"resultados": resultados}
 
 @app.get("/todas")
