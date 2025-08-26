@@ -1,12 +1,34 @@
-# React + Vite
+# SolucionesTI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Base de conocimiento interactiva para soporte técnico: permite buscar y listar soluciones a problemas frecuentes, usando **FastAPI** en el backend y **Vite + React** en el frontend. El matching se realiza con **TF‑IDF** y **similaridad del coseno** sobre un CSV de problemas/soluciones.
 
-Currently, two official plugins are available:
+> **Demo**
+>
+> * Frontend (Netlify): [https://solucionesti.netlify.app](https://solucionesti.netlify.app)
+> * Backend (Render): [https://solucionesti.onrender.com](https://solucionesti.onrender.com)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## Expanding the ESLint configuration
+## ✨ Características
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+* Login sencillo con token Bearer (prototipo).
+* Búsqueda de soluciones por texto libre (TF‑IDF + coseno).
+* Vista previa con 4 soluciones aleatorias al iniciar sesión.
+* Botón para **mostrar todas** las soluciones del dataset.
+* CORS configurado para permitir el frontend desplegado en Netlify.
+
+> ⚠️ **Datos sensibles**: el CSV de ejemplo incluye credenciales internas. No publicar repositorio/instancias públicas con esos datos. Sustituir por ejemplos o mover a una base de datos segura.
+
+---
+
+## 🛠️ Tecnologías
+
+* **Backend**: Python 3, FastAPI, Uvicorn, Pandas, scikit‑learn
+* **Frontend**: Vite + React, Fetch API, CSS
+* **Despliegue**: Render (backend), Netlify (frontend)
+---
+
+## 🤝 Contribuciones
+
+1. Hacer fork y rama feature: `feature/nueva-funcionalidad`.
+2. Pull Request con descripción y evidencias.

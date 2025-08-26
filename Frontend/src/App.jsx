@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 
+// ⚠️ Cambia esta URL cuando lo subas a Render
 const API_BASE = "https://solucionesti.onrender.com";
 
 function App() {
@@ -10,51 +11,18 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [showAll, setShowAll] = useState(false);
-  const [loggedIn, setLoggedIn] = useState(false);
-
-  // Credenciales
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-
-  // Token guardado
-  const token = localStorage.getItem("token");
-
-  // ---- LOGIN ----
-  const handleLogin = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          username,
-          password,
-        }),
-      });
-
-      if (!res.ok) throw new Error("Login fallido");
-      const data = await res.json();
-      localStorage.setItem("token", data.access_token);
-      setLoggedIn(true);
-    } catch (err) {
-      setErrorMsg("Usuario o contraseña incorrectos");
-    }
-  };
 
   // ---- Cargar inicial ----
   useEffect(() => {
-    if (!token) return;
     const cargarInicial = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${API_BASE}/todas`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetch(`${API_BASE}/todas`);
         if (!res.ok) throw new Error("Error al cargar soluciones");
         const data = await res.json();
         setAllResults(data.resultados || []);
         const shuffled = [...data.resultados].sort(() => 0.5 - Math.random());
         setResults(shuffled.slice(0, 4));
-        setLoggedIn(true);
       } catch (err) {
         setErrorMsg("No se pudieron cargar las soluciones iniciales.");
       } finally {
@@ -62,7 +30,7 @@ function App() {
       }
     };
     cargarInicial();
-  }, [token]);
+  }, []);
 
   // ---- Buscar ----
   const buscarSoluciones = async () => {
@@ -74,10 +42,7 @@ function App() {
     try {
       const res = await fetch(`${API_BASE}/buscar`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query, top_n: 4 }),
       });
 
@@ -85,7 +50,7 @@ function App() {
       const data = await res.json();
       setResults(data.resultados || []);
     } catch (err) {
-      setErrorMsg("No se pudo consultar el backend. ¿Login realizado?");
+      setErrorMsg("No se pudo consultar el backend.");
     } finally {
       setLoading(false);
     }
@@ -101,28 +66,6 @@ function App() {
   };
 
   // ---- Render ----
-  if (!loggedIn) {
-    return (
-      <div className="login-container">
-        <h1>Iniciar sesión</h1>
-        <input
-          type="text"
-          placeholder="Usuario"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Contraseña"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button onClick={handleLogin}>Entrar</button>
-        {errorMsg && <div className="error">{errorMsg}</div>}
-      </div>
-    );
-  }
-
   return (
     <div className="app-container">
       <section className="app-header">
